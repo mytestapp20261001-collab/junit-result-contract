@@ -1,0 +1,130 @@
+{
+  "schema_version": 1,
+  "slug": "junit-result-contract",
+  "domain": "quality",
+  "guidance_group": "medium",
+  "source_commit": "1286096c10a23bbb04aca83679ae3c31f3326030",
+  "source_repository": "mytestapp20261001-collab/mytest-engineering-toolbox",
+  "source_repository_id": 1411411288,
+  "source_path": "tools/junit-result-contract",
+  "root_path": ".",
+  "publication_status": "prepared_only; coordinator verifies final repository identity and remote CI",
+  "expected_repository": "mytestapp20261001-collab/junit-result-contract",
+  "repository_id": null,
+  "preserved_files": [
+    {
+      "path": "README.md",
+      "size_bytes": 3634,
+      "sha256": "5b482b9c69191577182be69c26330a87975eb2391c9b3d7b29ab324113e17ebd",
+      "git_blob_sha1": "f5583b33ac8fffa852377eaaa62a0e506a6ebd8c",
+      "utf8": true,
+      "source_path": "tools/junit-result-contract/README.md"
+    },
+    {
+      "path": "SKILL.md",
+      "size_bytes": 1094,
+      "sha256": "3684166bc8aedd6d3664c2cb9cbaaccba17f148ee3dbc572943ead661b00703a",
+      "git_blob_sha1": "a4445ecb2a6ed4a98b8fadb506e05b26a3ac6b1c",
+      "utf8": true,
+      "source_path": "tools/junit-result-contract/SKILL.md"
+    },
+    {
+      "path": "examples/fail.xml",
+      "size_bytes": 202,
+      "sha256": "2983a3ec3af9355a804ef3fe5e7156d15ece8abed8fdb62f82ba5b2b21d8bd4d",
+      "git_blob_sha1": "61abb10a940b4e59348b12b226892b56e48f0c25",
+      "utf8": true,
+      "source_path": "tools/junit-result-contract/examples/fail.xml"
+    },
+    {
+      "path": "examples/pass.xml",
+      "size_bytes": 247,
+      "sha256": "8a013db4ee4e9adc79f4c2281242a9246af265ee7375f4b15bc5e9cf7a1c41f8",
+      "git_blob_sha1": "5dcac0bd54736d92fbbc3fff39f0e18e7d2a6cc9",
+      "utf8": true,
+      "source_path": "tools/junit-result-contract/examples/pass.xml"
+    },
+    {
+      "path": "test_tool.py",
+      "size_bytes": 3602,
+      "sha256": "f96d7d9f261c15e8dd2b6c0ce718797872e53e3cdbcea8beeef80abd9fbd335b",
+      "git_blob_sha1": "947f57a3d97250b28d622f90bb4ce3950d8b8e2e",
+      "utf8": true,
+      "source_path": "tools/junit-result-contract/test_tool.py"
+    },
+    {
+      "path": "tool.py",
+      "size_bytes": 6153,
+      "sha256": "9e575e236e41e68bde372cf58a2e0f2394827f2e2d3ed14597bdc9d03f8906df",
+      "git_blob_sha1": "39d9f2fbe00246787406755d39e8ac3641e7d2d3",
+      "utf8": true,
+      "source_path": "tools/junit-result-contract/tool.py"
+    },
+    {
+      "path": "LICENSE",
+      "size_bytes": 1076,
+      "sha256": "dce76471613629e93f3f98b7aaa6f72ff9adb88204a3f83d3045952017ab2f46",
+      "git_blob_sha1": "677c4463d59b560db9c1fde1052eff6eefa6441a",
+      "utf8": true,
+      "source_path": "LICENSE"
+    },
+    {
+      "path": ".gitignore",
+      "size_bytes": 62,
+      "sha256": "e4d5aecc4cd36f593c2e7f3dad08b24261b13466b898004a445614058d29d8de",
+      "git_blob_sha1": "fe9f8fb619601213cbfef4f6eadb5d413d8f7f01",
+      "utf8": true,
+      "source_path": ".gitignore"
+    }
+  ],
+  "readme_checks": [
+    {
+      "label": "README example",
+      "args": [
+        "-I",
+        "tool.py",
+        "examples/pass.xml"
+      ],
+      "expected_exit": 0,
+      "output": "json",
+      "documented_command": "python3.12 -I tool.py examples/pass.xml"
+    },
+    {
+      "label": "README example",
+      "args": [
+        "-I",
+        "tool.py",
+        "examples/fail.xml"
+      ],
+      "expected_exit": 1,
+      "output": "json",
+      "documented_command": "python3.12 -I tool.py examples/fail.xml  # expected exit 1"
+    },
+    {
+      "label": "CLI help",
+      "args": [
+        "tool.py",
+        "--help"
+      ],
+      "expected_exit": 0,
+      "output": "help"
+    },
+    {
+      "label": "CLI missing input",
+      "args": [
+        "tool.py"
+      ],
+      "expected_exit": 2,
+      "output": "json"
+    },
+    {
+      "label": "CLI unknown argument",
+      "args": [
+        "tool.py",
+        "--unsupported-migration-test"
+      ],
+      "expected_exit": 2,
+      "output": "json"
+    }
+  ]
+}

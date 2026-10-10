@@ -1,0 +1,1 @@
+<testsuite name="unit" tests="3" failures="0" errors="0" skipped="0"><testcase classname="Demo" name="a"><failure>synthetic failure</failure></testcase><testcase classname="Demo" name="a"/></testsuite>
