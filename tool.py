@@ -66,12 +66,16 @@ import re
 import xml.etree.ElementTree as ET
 TOOL = "junit-result-contract"
 
+class NoDTDTreeBuilder(ET.TreeBuilder):
+    def doctype(self, name, pubid, system):
+        # A parser event distinguishes real declarations from inert log text.
+        raise BadInput("DTD/entity declarations are forbidden")
+
 def audit(text):
     require(isinstance(text, str), "expected XML text")
     require(len(text.encode("utf-8")) <= MAX_BYTES, "input exceeds 2 MiB limit")
-    require(re.search(r"<!\s*(DOCTYPE|ENTITY)\b", text, re.I) is None, "DTD/entity declarations are forbidden")
     try:
-        root = ET.fromstring(text)
+        root = ET.fromstring(text, parser=ET.XMLParser(target=NoDTDTreeBuilder()))
     except ET.ParseError:
         raise BadInput("malformed XML") from None
     require(root.tag in ("testsuite", "testsuites"), "expected unnamespaced testsuite or testsuites root")

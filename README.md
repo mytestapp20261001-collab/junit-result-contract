@@ -33,7 +33,7 @@ Input is UTF-8 XML with an unnamespaced `testsuite` root, or a `testsuites` root
 
 A testcase requires a nonempty name. Duplicate identity is the exact tuple `(suite name, classname, testcase name)` across all suites. Suite/testcase logs and properties are ignored, never printed. Unknown direct child tags, namespaces and nested suites are rejected as outside the supported subset. No universal JUnit XML standard is assumed: adapt reports to this stated contract or choose a validator matching your producer. Pytest's reference is a producer example, not a schema this tool fully validates.
 
-DTD and entity declarations are rejected before parsing. Limits: 2 MiB UTF-8 text, 50,000 XML elements, 1,000 suites, 10,000 testcases, 1,024-character testcase names; counters at most 12 decimal digits. Empty reports/suites are findings. This never reruns tests, checks test durations, reads referenced files, or reproduces failures.
+The XML parser rejects actual DTD declarations before processing the document's elements or entity references. Entity declarations outside a DTD are malformed XML and are also rejected. Literal declaration text inside CDATA logs, comments, or processing instructions is not a declaration and is ignored. Limits: 2 MiB UTF-8 text, 50,000 XML elements, 1,000 suites, 10,000 testcases, 1,024-character testcase names; counters at most 12 decimal digits. Empty reports/suites are findings. This never reruns tests, checks test durations, reads referenced files, or reproduces failures.
 
 ## API
 

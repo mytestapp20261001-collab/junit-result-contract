@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check this standalone release's unchanged source and documentation packaging."""
+"""Check historical migration hashes, reviewed maintenance, and packaging."""
 import ast
 import hashlib
 import json
@@ -10,14 +10,48 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def maintenance_hashes(record, maintenance):
+    """Record current hashes separately without rewriting migration evidence."""
+    expected = {entry['path']: entry['sha256'] for entry in record['preserved_files']}
+    if maintenance is None:
+        return expected
+    if (type(maintenance.get('schema_version')) is not int or maintenance['schema_version'] != 1
+            or type(maintenance.get('repository_id')) is not int
+            or maintenance['repository_id'] != 1413238081
+            or maintenance.get('base_commit') != 'b8ca51ee1a65b30ecc83be876084003d79b7a3eb'
+            or not isinstance(maintenance.get('changes'), list)):
+        raise ValueError('invalid maintenance receipt')
+    seen = set()
+    for change in maintenance['changes']:
+        path = change.get('path')
+        if (path not in {'tool.py', 'test_tool.py', 'README.md'} or path in seen
+                or change.get('original_sha256') != expected[path]
+                or not isinstance(change.get('reason'), str) or not change['reason'].strip()
+                or not re.fullmatch(r'[0-9a-f]{64}', change.get('current_sha256', ''))):
+            raise ValueError('invalid maintenance change')
+        seen.add(path)
+        expected[path] = change['current_sha256']
+    if seen != {'tool.py', 'test_tool.py', 'README.md'}:
+        raise ValueError('incomplete maintenance receipt')
+    return expected
+
+
 def main():
     record = json.loads((ROOT / 'docs/MIGRATION.json').read_text())
     errors = []
+    try:
+        receipt_path = ROOT / 'docs/MAINTENANCE_2026-11-08.json'
+        receipt = json.loads(receipt_path.read_text()) if receipt_path.exists() else None
+        expected = maintenance_hashes(record, receipt)
+    except (ValueError, TypeError, AttributeError, KeyError):
+        print(json.dumps({'tool': record['slug'], 'valid': False,
+                          'errors': ['invalid maintenance receipt']}))
+        return 1
     for entry in record['preserved_files']:
         path = ROOT / entry['path']
         if not path.is_file() or path.is_symlink():
             errors.append('missing or symlink: ' + entry['path'])
-        elif hashlib.sha256(path.read_bytes()).hexdigest() != entry['sha256']:
+        elif hashlib.sha256(path.read_bytes()).hexdigest() != expected[entry['path']]:
             errors.append('changed preserved file: ' + entry['path'])
     for path in ROOT.rglob('*'):
         if '.git' in path.parts or '__pycache__' in path.parts or not path.is_file():

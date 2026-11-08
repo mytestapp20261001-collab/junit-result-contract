@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "repository_id": 1413238081,
+  "base_commit": "b8ca51ee1a65b30ecc83be876084003d79b7a3eb",
+  "date": "2026-11-08",
+  "scope": "Fix false rejection of inert XML declaration text; preserve original migration evidence and guidance assignment.",
+  "changes": [
+    {
+      "path": "tool.py",
+      "original_sha256": "9e575e236e41e68bde372cf58a2e0f2394827f2e2d3ed14597bdc9d03f8906df",
+      "current_sha256": "04675c0b27a7b714266528b6492e252ddb74825b3e888195f3a23a32d53474a7",
+      "reason": "Reject actual DTD declarations via a parser event while allowing inert declaration text in ignored logs and comments."
+    },
+    {
+      "path": "test_tool.py",
+      "original_sha256": "f96d7d9f261c15e8dd2b6c0ce718797872e53e3cdbcea8beeef80abd9fbd335b",
+      "current_sha256": "caa13fc8ff536194cab9dea547b6d05be1aae414d7c014db2bf40160702a9f7a",
+      "reason": "Regress CDATA, comments, processing instructions and CLI false rejection; retain real DTD and entity rejection."
+    },
+    {
+      "path": "README.md",
+      "original_sha256": "5b482b9c69191577182be69c26330a87975eb2391c9b3d7b29ab324113e17ebd",
+      "current_sha256": "6780754f68de7592e57242adbad0c05032039d10f3061643e0cdef53f27bd87a",
+      "reason": "Clarify parser-based DTD rejection and treatment of inert declaration text."
+    }
+  ]
+}

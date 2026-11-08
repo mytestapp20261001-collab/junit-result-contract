@@ -57,4 +57,51 @@ class Tests(unittest.TestCase):
             path=Path(d)/'bad.xml'; path.write_text('<secret>')
             result=self.cli(path); self.assertEqual(result.returncode,2); self.assertNotIn('secret',result.stdout)
 
+class DeclarationTextTests(unittest.TestCase):
+    def report(self, extra):
+        return ('<testsuite name="s" tests="1" failures="0" errors="0" skipped="0">'
+                '<testcase name="one"/>' + extra + '</testsuite>')
+
+    def test_declaration_text_in_ignored_logs(self):
+        for tag in ('system-out', 'system-err'):
+            for literal in ('<!DOCTYPE html>', '<!ENTITY x "PRIVATE_LITERAL">',
+                            '<!doctype html>', '<!DOCTYPE testsuite SYSTEM "file:///not-read">'):
+                with self.subTest(tag=tag, literal=literal):
+                    text = self.report('<' + tag + '><![CDATA[' + literal + ']]></' + tag + '>')
+                    result = tool.audit(text)
+                    self.assertEqual(result['status'], 'pass')
+                    self.assertNotIn('PRIVATE_LITERAL', json.dumps(result))
+
+    def test_declaration_text_in_comments_and_processing_instructions(self):
+        for extra in ('<!-- <!DOCTYPE html> -->', '<!-- <!ENTITY x "PRIVATE_LITERAL"> -->',
+                      '<?log <!DOCTYPE html> ?>', '<?log <!ENTITY x "PRIVATE_LITERAL"> ?>'):
+            with self.subTest(extra=extra):
+                self.assertEqual(tool.audit(self.report(extra))['status'], 'pass')
+
+    def test_actual_declarations_still_rejected(self):
+        for declaration in ('<!DOCTYPE testsuite>',
+                            '<!DOCTYPE testsuite SYSTEM "file:///PRIVATE_LITERAL">',
+                            '<!DOCTYPE testsuite PUBLIC "id" "https://invalid.example/not-requested">',
+                            '<!DOCTYPE testsuite [<!ENTITY x "value">]>',
+                            '<!DOCTYPE testsuite [<!ENTITY x SYSTEM "file:///PRIVATE_LITERAL">]>',
+                            '<!DOCTYPE testsuite [<!ENTITY % x SYSTEM "https://invalid.example/not-requested">%x;]>'):
+            with self.subTest(declaration=declaration):
+                with self.assertRaisesRegex(tool.BadInput, '^DTD/entity declarations are forbidden$'):
+                    tool.audit(declaration + self.report(''))
+        for text in ('<!ENTITY x "value">' + self.report(''),
+                     self.report('<system-out>&undefined;</system-out>')):
+            with self.assertRaises(tool.BadInput):
+                tool.audit(text)
+
+    def test_cli_ignored_declaration_literal(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'report.xml'
+            path.write_text(self.report('<system-out><![CDATA[<!DOCTYPE html> PRIVATE_LITERAL]]></system-out>'))
+            result = subprocess.run([sys.executable, str(HERE / 'tool.py'), str(path)],
+                                    capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(json.loads(result.stdout)['status'], 'pass')
+            self.assertNotIn('PRIVATE_LITERAL', result.stdout + result.stderr)
+
+
 if __name__ == "__main__": unittest.main()
